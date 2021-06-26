@@ -4,7 +4,7 @@
 > "ITO"는 다른 기업에서 진행하는 프로젝트를 위탁받아 원하는 직군의 인력을 연결시켜주는 서비스입니다. 사용자는 지원하고자 하는 역할(기획, 디자인, 개발)을 기입하고 자신의 기술, 경력 등을 입력하여 프로필을 등록하고 직접 원하는 프로젝트에 지원하여 기업에서 연락을 받게되면 프로젝트에 투입되어 진행할 수 있게 됩니다. 
 
 ## ITO Project 기능 설명
-### [관리자 메뉴]는 기업에서 사용됨
+### [관리자 메뉴] _기업에서 사용
 * * *
 **1. 사용자 현황 페이지**
   - **[사용자 검색]** TextField에 원하는 조건을 입력하면 해당 조건에 맞는 사용자들을 찾아서 보여줍니다.  
@@ -101,5 +101,49 @@
   - **프로젝트 상세페이지**에서는 프로젝트에 대한 현황(필요 기술, 학위, 뽑는 인원 등의 정보) 
   - 해당 프로젝트에 **[지원한 사람의 정보]**, **[지원한 사람들 중 뽑힌 사람의 정보]**, **[가용 인력 목록]** 를 보여줍니다.
     + **[가용인력]** 은 해당 프로젝트에 지원할 수 있는 사용자들의 목록으로 기업에서 원하는 인력을 사용자와 협의 후 투입 시킬 수 있다.
+      * **[투입하기]** 버튼으로 사용자를 바로 프로젝트에 투입 시킬 수 있다.    
 
+
+  📄 사용 API
+  ```javaScript
+             //프로젝트 API
+             "project": {
+                "getProjectList": function (params) { return axios({"url": "/api/common/projects", "method": "get", "params": params}); },
+                "getProject": function (id) { return axios({"url": "/api/common/projects/" + id, "method": "get"}); },
+                "createProjectList": function (data) { return axios({"url": "/api/common/projects?bulk", "method": "post", "data": data}); },
+                "createProject": function (data) { return axios({"url": "/api/common/projects", "method": "post", "data": data}); },
+                "modifyProjectList": function (data) { return axios({"url": "/api/common/projects", "method": "put", "data": data}); },
+                "modifyProject": function (id, data) { return axios({"url": "/api/common/projects/" + id, "method": "put", "data": data}); },
+                "removeProjectList": function (data) { return axios({"url": "/api/common/projects", "method": "delete", "data": data}); },
+                "removeProject": function (id) { return axios({"url": "/api/common/projects/"+ id, "method": "delete"}); }
+            },
+            
+            //프로젝트에 지원한 사용자 관련 API (지원한 사람, 확정된 사람의 정보)
+            "projectPerson": {
+                "getProjectPersonList": function(params) {return axios({"url": "/api/common/project-person", "method": "get", "params": params}); },
+                "createProjectPerson": function (data) { return axios({"url": "/api/common/project-person", "method": "post", "data": data}); },
+                "modifyProjectPerson": function (personId, projectId, data) { return axios({"url": "/api/common/project-person/" + personId + "," + projectId, "method": "put", "data": data}); },
+                "removeProjectPerson": function (projectId, personId) { return axios({"url": "/api/common/project-person/"+ projectId + "," + personId, "method": "delete"}); },
+                "removeProjectPersonList": function (data) { return axios({"url": "/api/common/project-person","method": "delete" , "data": data}); }
+            },
+            
+            //프로젝트에 대한 목록을 Excel로 다운로드 API
+            "projectDownload": {
+                "downloadProjectListXlsx": async function(params) {
+                    let a, data, url;
+                    data = (await axios({
+                        "url": "/api/app/project-downloads/list.xlsx",
+                        "method": "get",
+                        "responseType": "blob",
+                        "params": params
+                    })).data;
+                    url = window.URL.createObjectURL(data);
+                    a = document.createElement("a");
+                    a.setAttribute("href", url);
+                    a.setAttribute("download", "프로젝트목록.xlsx");
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                },
+            },  
+  ```
 

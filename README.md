@@ -15,7 +15,7 @@
   - **[사용자 목록]** 에 있는 사용자를  클릭하면 **사용자 프로필** 페이지로 이동하여 정보를 수정할 수 있습니다.
   
   
-  :pushpin: 사용 API
+  📄 사용 API
   ```javaScript
               "person": {
                 "getPersonList": function (params) { return axios({"url": "/api/common/people", "method": "get", "params": params}); },

@@ -7,8 +7,8 @@
 ### [관리자 메뉴]
 * * *
 **1. 사용자 현황 페이지**
-  - **[사용자 검색]** 박스에 원하는 조건을 입력하면 해당 조건에 맞는 사용자들을 찾아서 보여줍니다.  
-    + PersonMapper.xml 에 입력한 조건을 기준으로 사용자DB에서 검색하여 List로 가져옵니다. 
+  - **[사용자 검색]** TextField에 원하는 조건을 입력하면 해당 조건에 맞는 사용자들을 찾아서 보여줍니다.  
+    + PersonMapper.xml 에 입력한 조건을 기준으로 사용자DB에서 검색하여 List로 가져옵니다. (Mybatis 사용)
   - **[업로드]** 버튼으로 사용자의 정보를 엑셀을 통해서 대량으로 추가할 수 있습니다.  
     + ex) 엑셀에 100명의 사용자 정보를 형식에 맞춰 입력하면 대량 업로드가 가능합니다.
     + ```java
@@ -24,7 +24,22 @@
        XSSFWorkbook workbook = new XSSFWorkbook(opcPackage);      
      
   - **[삭제]** 버튼으로 해당 사용자의 정보를 삭제할 수 있습니다.
-  - **[엑셀 다운로드]** 로 해당 목록에 있는 사용자 정보를 엑셀로 저장 할 수 있습니다.     
+  - **[엑셀 다운로드]** 로 해당 목록에 있는 사용자 정보를 엑셀로 저장 할 수 있습니다.
+    + ```java
+       @RestController
+       @RequestMapping(path = "api/app/person-downloads")
+       public class ApiCommonPersonFileDownloadController {
+       @Autowired
+       private PersonDataDownloadService personDataDownloadService;
+
+       @GetMapping(path = "list.xlsx", produces = {"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"})
+       public byte[] getPersonListXlsx(
+            @ModelAttribute PersonParamDto personParamDto,
+            @ModelAttribute PageRequest pageRequest) {
+               return personDataDownloadService.getPersonListXlsx(personParamDto, pageRequest);
+            }
+       }
+     
   - **[사용자 목록]** 에 있는 사용자를  클릭하면 **사용자 프로필** 페이지로 이동하여 정보를 수정할 수 있습니다.
   
 **2. 사용자 프로필 입력 페이지**
@@ -48,9 +63,36 @@
             "upload" : {
                 "person" : function (data) { return axios({"url": "/api/app/uploads/person","enctype": "multipart/form-data", "contentType" : false, "cache" : false, "processData" : false, "method": "post", "data": data});}
             },
+            //Excel 다운로드 API
+            "personDownload": {
+                "downloadPersonListXlsx": async function(params, title) {
+                    let a, data, url;
+                    data = (await axios({
+                        "url": "/api/app/person-downloads/list.xlsx",
+                        "method": "get",
+                        "responseType": "blob",
+                        "params": params
+                    })).data;
+                    url = window.URL.createObjectURL(data);
+                    a = document.createElement("a");
+                    a.setAttribute("href", url);
+                    switch(title) {
+                        case "available": a.setAttribute("download", "가용인력 현황.xlsx"); break;
+                        case "confirm": a.setAttribute("download", "확정 현황.xlsx"); break;
+                        case "apply": a.setAttribute("download", "지원자 현황.xlsx"); break;
+                        default: a.setAttribute("download", "사용자 현황.xlsx");
+                    }
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                },
+            },
+```            
 
 
-  ```
+**3. 프로젝트 목록 페이지**
+  - **[프로젝트 검색]** TextField에 원하는 조건을 입력하면 해당 조건에 맞는 프로젝트를 찾아서 보여줍니다.  
+    + PersonMapper.xml 에 입력한 조건을 기준으로 프로젝트DB에서 검색하여 List로 가져옵니다. (Mybatis 사용)
+  - **
   
 
 
